@@ -3,10 +3,11 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
+from typing import Any
 
 from pydantic import BaseModel, EmailStr, Field
 
-from app.adapters.models import UserRole
+from app.adapters.models import SkillCategory, SkillSource, UserRole
 
 
 class UserCreate(BaseModel):
@@ -41,3 +42,55 @@ class TokenPair(BaseModel):
 class AccessToken(BaseModel):
     access_token: str
     token_type: str = "bearer"
+
+
+# ---- Profile / Skills ----
+class ProfileUpdate(BaseModel):
+    education: list[Any] | None = None
+    learning_style: str | None = Field(default=None, max_length=50)
+    weekly_hours: int | None = Field(default=None, ge=0, le=168)
+    target_companies: list[str] | None = None
+    expected_salary: int | None = Field(default=None, ge=0)
+    interests: list[str] | None = None
+    career_goal: str | None = Field(default=None, max_length=200)
+
+
+class ProfileOut(BaseModel):
+    id: uuid.UUID
+    user_id: uuid.UUID
+    education: list[Any] | None
+    learning_style: str | None
+    weekly_hours: int | None
+    target_companies: list[str] | None
+    expected_salary: int | None
+    interests: list[str] | None
+    career_goal: str | None
+    twin_version: int
+
+    model_config = {"from_attributes": True}
+
+
+class SkillOut(BaseModel):
+    id: uuid.UUID
+    name: str
+    slug: str
+    category: SkillCategory
+
+    model_config = {"from_attributes": True}
+
+
+class UserSkillCreate(BaseModel):
+    skill_name: str = Field(min_length=1, max_length=120)
+    proficiency: int = Field(default=0, ge=0, le=100)
+    source: SkillSource = SkillSource.manual
+
+
+class UserSkillOut(BaseModel):
+    skill_id: uuid.UUID
+    name: str
+    slug: str
+    category: SkillCategory
+    proficiency: int
+    source: SkillSource
+
+    model_config = {"from_attributes": True}
