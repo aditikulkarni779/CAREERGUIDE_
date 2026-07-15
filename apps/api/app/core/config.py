@@ -36,6 +36,16 @@ class Settings(BaseSettings):
 
     # Auth
     jwt_secret: str = "change-me-in-prod"
+    jwt_algorithm: str = "HS256"
+    access_token_ttl_min: int = 30
+    refresh_token_ttl_days: int = 14
+
+    # OAuth
+    oauth_github_id: str = ""
+    oauth_github_secret: str = ""
+    oauth_google_id: str = ""
+    oauth_google_secret: str = ""
+    frontend_url: str = "http://localhost:3000"
 
     @property
     def is_prod(self) -> bool:

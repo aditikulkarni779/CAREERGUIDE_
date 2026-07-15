@@ -13,6 +13,10 @@ dependencies = [
     "alembic>=1.13",
     "psycopg[binary]>=3.2",
     "python-dotenv>=1.0",
+    "pyjwt>=2.9",
+    "bcrypt>=4.2",
+    "email-validator>=2.2",
+    "httpx>=0.27",
 ]
 
 [project.optional-dependencies]
@@ -37,6 +41,17 @@ target-version = "py310"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "W"]
+
+[tool.ruff.lint.flake8-bugbear]
+# FastAPI dependency-injection markers are safe in argument defaults.
+extend-immutable-calls = [
+    "fastapi.Depends",
+    "fastapi.Query",
+    "fastapi.Path",
+    "fastapi.Body",
+    "fastapi.Header",
+    "fastapi.security.HTTPBearer",
+]
 
 [tool.mypy]
 python_version = "3.10"
