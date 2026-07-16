@@ -5,7 +5,8 @@ from functools import lru_cache
 
 from app.core.config import Settings, get_settings
 from app.rag.embeddings import BgeDenseEmbedder, BgeSparseEmbedder, CachedDenseEmbedder
-from app.rag.ports import DenseEmbedder, SparseEmbedder, VectorStore
+from app.rag.ports import DenseEmbedder, Reranker, SparseEmbedder, VectorStore
+from app.rag.rerank import BgeReranker
 from app.rag.retriever import Retriever
 from app.rag.vector_store import QdrantVectorStore
 
@@ -35,10 +36,17 @@ def build_vector_store(settings: Settings, dense_dim: int) -> VectorStore:
     return QdrantVectorStore(client, settings.qdrant_collection_prefix, dense_dim, use_sparse=True)
 
 
+def build_reranker(settings: Settings) -> Reranker | None:
+    if not settings.rerank_enabled:
+        return None
+    return BgeReranker(settings.rerank_model)
+
+
 @lru_cache
 def get_retriever(collection: str = "roadmap_kb") -> Retriever:
     settings = get_settings()
     dense = build_dense_embedder(settings)
     sparse = build_sparse_embedder(settings)
     store = build_vector_store(settings, dense.dim)
-    return Retriever(dense, sparse, store, collection)
+    reranker = build_reranker(settings)
+    return Retriever(dense, sparse, store, collection, reranker, settings.rag_top_k)

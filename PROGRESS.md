@@ -8,15 +8,30 @@ Newest entries at top. One entry per work session/day.
 ---
 
 ## Status Snapshot
-- **Current phase:** Phase 2 (RAG Core) — vector infra done
-- **Milestones hit:** M1 (infra + auth), M2 (Career Twin + onboarding)
-- **Next up:** Week 6 — first real KB ingest + reranker + RAG eval baseline (→ M3)
+- **Current phase:** Phase 3 (Agent Orchestrator + Chat) — up next
+- **Milestones hit:** M1 (infra+auth), M2 (Twin+onboarding), M3 (grounded RAG + citations + eval baseline)
+- **Next up:** Week 7 — LangGraph core + Planner/Chat agents
 - **Stack live:** Postgres, Redis, Qdrant, Neo4j, MinIO (Docker, all healthy)
 - **Repo:** github.com/aditikulkarni779/CAREERGUIDE_ (main pushed through W4)
-- **Test count:** 25 passing (sqlite + in-memory Qdrant) · ruff + mypy clean
+- **Test count:** 28 passing (sqlite + in-memory Qdrant) · ruff + mypy clean
 - **Migrations applied:** 0001 (users), 0002 (profiles/skills/roles), 0003 (readiness_scores)
-- **Seed data:** 46 skills, 8 roles, 60 role requirements; roadmap_kb: 6 RAG chunks
-- **Embeddings:** BGE-local (`bge-small-en-v1.5`, 384-dim) + BM25 sparse — offline, no keys
+- **Seed data:** 46 skills, 8 roles, 60 role reqs; roadmap_kb: 6 RAG chunks
+- **Embeddings:** BGE-local (384-dim) + BM25 sparse + local cross-encoder reranker — offline, no keys
+- **RAG eval baseline:** hit@1 1.0, MRR 1.0, recall@5 1.0 (n=10) — `apps/api/docs/rag_eval_baseline.json`
+
+---
+
+## Week 6 — Reranker + Citations + Eval Baseline  ✅ **M3**
+**Goal:** grounded, cited retrieval + recorded quality baseline.
+
+- ✅ Reranker adapter: local cross-encoder (`ms-marco-MiniLM-L-6-v2`, fastembed, no key) + fake reranker for tests.
+- ✅ Retriever pipeline: rewrite(identity) → hybrid candidate pool → rerank → top-N; `retrieve_with_citations`.
+- ✅ Citation assembly: dedup by (title,url), snippet with source — grounding for answers.
+- ✅ Retrieval eval harness: golden set (10 q→role), metrics hit@1 / MRR / recall@k; baseline JSON recorded.
+- ✅ 3 new tests (28 total). ruff + mypy clean.
+- ✅ **Live verified:** real BGE + reranker + Qdrant → hit@1/MRR/recall@5 all 1.0 on golden set.
+- **Exit:** **M3** — `retrieve()` cited + baseline logged. ✔
+- ⏭️ Faithfulness/answer-relevancy (Ragas) deferred to post-chat (need generation) — honest: current baseline is retrieval-only on a tiny KB.
 
 ---
 

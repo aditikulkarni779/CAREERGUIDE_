@@ -33,6 +33,8 @@ class Settings(BaseSettings):
     qdrant_collection_prefix: str = "cc"
     rag_top_k: int = 20
     rag_final_k: int = 8
+    rerank_enabled: bool = True
+    rerank_model: str = "Xenova/ms-marco-MiniLM-L-6-v2"
 
     # Datastores
     database_url: str = "postgresql+psycopg://app:app@localhost:5432/app"

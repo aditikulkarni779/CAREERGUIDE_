@@ -17,3 +17,11 @@ class Chunk:
     text: str
     payload: dict[str, Any] = field(default_factory=dict)
     score: float = 0.0
+
+
+@dataclass
+class Citation:
+    title: str
+    source: str
+    url: str | None
+    snippet: str

@@ -1,7 +1,8 @@
 """Seed a tiny roadmap knowledge base and demo retrieval (live, BGE + Qdrant).
 
-    python -m data_seed.seed_rag
+python -m data_seed.seed_rag
 """
+
 from __future__ import annotations
 
 from app.core.config import get_settings
@@ -28,7 +29,11 @@ DOCS: list[dict] = [
             "Learn statistics, hypothesis testing, and machine learning. Practice storytelling "
             "with data visualization and clear communication of results to stakeholders."
         ),
-        "payload": {"title": "Data Scientist Roadmap", "role": "data-scientist", "source": "roadmap"},
+        "payload": {
+            "title": "Data Scientist Roadmap",
+            "role": "data-scientist",
+            "source": "roadmap",
+        },
     },
     {
         "text": (
