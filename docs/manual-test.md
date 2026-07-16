@@ -147,6 +147,21 @@ Try another: `{ "query": "What should I learn to build apps with LLMs and RAG?" 
 
 ---
 
+## 6b. Test the chat UI (Week 8+)
+
+There's now a real chat page (no more `/docs` needed for chatting).
+
+1. On the Dashboard, click **Chat with mentor** (top-right).
+2. Type: `I know Python and SQL. How do I become an ML Engineer?` → **Send**.
+   **See:** the answer **types out live, word by word**, then a **Sources** box lists
+   `[1] ML Engineer Roadmap`.
+3. Click **+ New chat**, ask something else. Refresh the page.
+   **See:** both conversations in the left **sidebar**; click one to reopen its history.
+   *Proves:* streaming, conversation persistence, citations, and the verification gate
+   all work in the real UI.
+
+---
+
 ## 7. (Optional) Check retrieval quality + run the tests
 
 RAG eval baseline:

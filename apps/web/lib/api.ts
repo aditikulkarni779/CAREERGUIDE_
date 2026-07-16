@@ -113,7 +113,76 @@ export const api = {
   getReadiness: () => authed<Readiness>("/profile/readiness"),
 
   getSkills: () => authed<UserSkill[]>("/profile/skills"),
+
+  listConversations: () => authed<Conversation[]>("/conversations"),
+
+  createConversation: () =>
+    authed<Conversation>("/conversations", { method: "POST" }),
+
+  getMessages: (convId: string) =>
+    authed<ChatMessage[]>(`/conversations/${convId}/messages`),
+
+  deleteConversation: (convId: string) =>
+    fetch(`${BASE}/conversations/${convId}`, { method: "DELETE", headers: authHeader() }),
 };
+
+export type Conversation = { id: string; title: string; created_at: string };
+
+export type Citation = { title: string; source: string; url: string | null; snippet: string };
+
+export type ChatMessage = {
+  id: string;
+  role: string;
+  content: string;
+  citations: Citation[];
+  created_at: string;
+};
+
+export type StreamHandlers = {
+  onStep?: (data: Record<string, unknown>) => void;
+  onToken?: (t: string) => void;
+  onCitation?: (c: Citation) => void;
+  onDone?: (data: Record<string, unknown>) => void;
+  onError?: (err: string) => void;
+};
+
+// Stream a chat message over SSE (fetch + ReadableStream; EventSource is GET-only).
+export async function streamMessage(
+  convId: string,
+  content: string,
+  h: StreamHandlers,
+): Promise<void> {
+  const res = await fetch(`${BASE}/conversations/${convId}/messages`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeader() },
+    body: JSON.stringify({ content }),
+  });
+  if (!res.ok || !res.body) {
+    h.onError?.(`Request failed (${res.status})`);
+    return;
+  }
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const blocks = buffer.split("\n\n");
+    buffer = blocks.pop() ?? "";
+    for (const block of blocks) {
+      const eventLine = block.split("\n").find((l) => l.startsWith("event: "));
+      const dataLine = block.split("\n").find((l) => l.startsWith("data: "));
+      if (!eventLine || !dataLine) continue;
+      const event = eventLine.slice(7).trim();
+      const data = JSON.parse(dataLine.slice(6));
+      if (event === "token") h.onToken?.(data.t);
+      else if (event === "citation") h.onCitation?.(data);
+      else if (event === "agent_step") h.onStep?.(data);
+      else if (event === "done") h.onDone?.(data);
+    }
+  }
+}
 
 export const tokenStore = {
   save: (t: TokenPair) => {

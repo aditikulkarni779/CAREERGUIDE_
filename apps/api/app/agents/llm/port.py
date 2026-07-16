@@ -1,6 +1,7 @@
 """LLM port — the interface agents depend on. Adapters live alongside."""
 from __future__ import annotations
 
+from collections.abc import Iterator
 from dataclasses import dataclass
 from typing import Literal, Protocol
 
@@ -22,3 +23,12 @@ class LLMClient(Protocol):
         max_tokens: int = 1024,
         temperature: float = 0.2,
     ) -> str: ...
+
+    def stream(
+        self,
+        system: str,
+        messages: list[Message],
+        tier: Tier = "balanced",
+        max_tokens: int = 1024,
+        temperature: float = 0.2,
+    ) -> Iterator[str]: ...

@@ -1,6 +1,8 @@
 """Anthropic Claude LLM adapter (REST via httpx)."""
 from __future__ import annotations
 
+from collections.abc import Iterator
+
 import httpx
 
 from app.agents.llm.port import Message, Tier
@@ -42,3 +44,14 @@ class AnthropicClient:
         r.raise_for_status()
         blocks = r.json().get("content", [])
         return "".join(b.get("text", "") for b in blocks if b.get("type") == "text").strip()
+
+    def stream(
+        self,
+        system: str,
+        messages: list[Message],
+        tier: Tier = "balanced",
+        max_tokens: int = 1024,
+        temperature: float = 0.2,
+    ) -> Iterator[str]:
+        # Non-streaming fallback: yield the full completion once.
+        yield self.complete(system, messages, tier, max_tokens, temperature)

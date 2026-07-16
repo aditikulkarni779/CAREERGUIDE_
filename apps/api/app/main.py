@@ -9,6 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.auth import router as auth_router
 from app.api.chat import router as chat_router
+from app.api.conversations import router as conversations_router
 from app.api.health import router as health_router
 from app.api.oauth import router as oauth_router
 from app.api.profile import router as profile_router
@@ -42,6 +43,7 @@ def create_app() -> FastAPI:
     app.include_router(oauth_router, prefix="/api/v1")
     app.include_router(profile_router, prefix="/api/v1")
     app.include_router(chat_router, prefix="/api/v1")
+    app.include_router(conversations_router, prefix="/api/v1")
     return app
 
 

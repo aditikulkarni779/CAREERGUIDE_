@@ -71,15 +71,23 @@ export default function DashboardPage() {
           <h1 className="text-2xl font-bold">Dashboard</h1>
           <p className="text-sm text-gray-500">{user.email}</p>
         </div>
-        <button
-          onClick={() => {
-            tokenStore.clear();
-            router.push("/login");
-          }}
-          className="rounded-md border border-gray-300 px-4 py-2 text-sm"
-        >
-          Sign out
-        </button>
+        <div className="flex gap-2">
+          <Link
+            href="/chat"
+            className="rounded-md bg-black px-4 py-2 text-sm font-medium text-white"
+          >
+            Chat with mentor
+          </Link>
+          <button
+            onClick={() => {
+              tokenStore.clear();
+              router.push("/login");
+            }}
+            className="rounded-md border border-gray-300 px-4 py-2 text-sm"
+          >
+            Sign out
+          </button>
+        </div>
       </header>
 
       {!hasProfile && (

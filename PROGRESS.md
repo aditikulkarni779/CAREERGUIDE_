@@ -8,17 +8,32 @@ Newest entries at top. One entry per work session/day.
 ---
 
 ## Status Snapshot
-- **Current phase:** Phase 3 (Agent Orchestrator + Chat)
+- **Current phase:** Phase 3 (Agent Orchestrator + Chat) — chat experience done
 - **Milestones hit:** M1 (infra+auth), M2 (Twin+onboarding), M3 (grounded RAG + citations + eval baseline)
-- **Next up:** Week 8 — streaming chat (SSE) + conversation persistence + long-term memory
+- **Next up:** Week 9 — Skill Gap + Roadmap agents; skill-path workflow (→ M4, flagship demo)
 - **Stack live:** Postgres, Redis, Qdrant, Neo4j, MinIO (Docker, all healthy)
 - **Repo:** github.com/aditikulkarni779/CAREERGUIDE_ (main pushed through W4)
-- **Test count:** 32 passing (sqlite + in-memory Qdrant + FakeLLM) · ruff + mypy clean
-- **Migrations applied:** 0001 (users), 0002 (profiles/skills/roles), 0003 (readiness_scores)
+- **Test count:** 38 passing (sqlite + in-memory Qdrant + FakeLLM) · ruff + mypy clean
+- **Migrations applied:** 0001–0004 (users, profiles/skills/roles, readiness, conversations/messages)
 - **Seed data:** 46 skills, 8 roles, 60 role reqs; roadmap_kb: 6 RAG chunks
 - **Embeddings:** BGE-local + BM25 + local cross-encoder reranker — offline, no keys
-- **LLM:** Groq (dev, `LLM_PROVIDER=groq`, llama-3.1-8b + llama-3.3-70b) / Gemini / Anthropic — behind port. Gemini free key 429s; Groq works.
+- **LLM:** Groq (dev, `LLM_PROVIDER=groq`) / Gemini / Anthropic — behind port, streaming supported
 - **RAG eval baseline:** hit@1 1.0, MRR 1.0, recall@5 1.0 (n=10)
+
+---
+
+## Week 8 — Streaming Chat + Persistence + Memory + Verification  ✅
+**Goal:** chat persists, remembers, cites; verification blocks unsupported claims.
+
+- ✅ LLM streaming: `stream()` on port; Groq real SSE streaming; Gemini/Anthropic fallback; Fake word-stream.
+- ✅ Persistence: `conversations` + `messages` tables (migration 0004); conversation service (CRUD + messages).
+- ✅ SSE endpoint `POST /conversations/{id}/messages` (own session for stream lifecycle) + list/create/get/delete.
+- ✅ ChatStreamer: persist user → planner → recall memory → retrieve → stream tokens → citations → verify → persist assistant → done.
+- ✅ Verification agent (LLM fact-check, fail-open) + Long-term memory (summarize→embed→recall in `user_memory`, per-user filtered, best-effort).
+- ✅ Frontend: real Chat UI — sidebar of conversations, streaming answers, sources, new/open chat; dashboard "Chat with mentor" link.
+- ✅ 6 new tests (38 total). ruff + mypy clean; web tsc clean.
+- ✅ **Live-verified (Groq):** SSE stream (agent_step → tokens → citation → done verified:true), both messages persisted with citations.
+- **Exit:** chat persists, remembers (memory unit-verified), cites, verification gates. ✔
 
 ---
 

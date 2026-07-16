@@ -39,3 +39,11 @@ def get_db() -> Iterator[Session]:
         yield db
     finally:
         db.close()
+
+
+def new_session() -> Session:
+    """A standalone session (e.g. for streaming generators that outlive get_db)."""
+    if _SessionLocal is None:
+        get_engine()
+    assert _SessionLocal is not None
+    return _SessionLocal()

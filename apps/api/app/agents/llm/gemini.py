@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import time
+from collections.abc import Iterator
 from typing import Any
 
 import httpx
@@ -44,6 +45,17 @@ class GeminiClient:
             return ""
         parts = candidates[0].get("content", {}).get("parts", [])
         return "".join(p.get("text", "") for p in parts).strip()
+
+    def stream(
+        self,
+        system: str,
+        messages: list[Message],
+        tier: Tier = "balanced",
+        max_tokens: int = 1024,
+        temperature: float = 0.2,
+    ) -> Iterator[str]:
+        # Non-streaming fallback: yield the full completion once.
+        yield self.complete(system, messages, tier, max_tokens, temperature)
 
     def _post_with_retry(self, model: str, body: dict[str, Any]) -> dict[str, Any]:
         last: httpx.HTTPStatusError | None = None

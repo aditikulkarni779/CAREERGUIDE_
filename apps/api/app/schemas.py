@@ -149,3 +149,26 @@ class ChatResponse(BaseModel):
     intent: str
     target_role: str | None
     citations: list[CitationOut]
+
+
+# ---- Conversations ----
+class ConversationOut(BaseModel):
+    id: uuid.UUID
+    title: str
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+class MessageOut(BaseModel):
+    id: uuid.UUID
+    role: str
+    content: str
+    citations: list[Any]
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+class SendMessage(BaseModel):
+    content: str = Field(min_length=1, max_length=2000)
