@@ -17,23 +17,24 @@ Newest entries at top. One entry per work session/day.
 - **Migrations applied:** 0001 (users), 0002 (profiles/skills/roles), 0003 (readiness_scores)
 - **Seed data:** 46 skills, 8 roles, 60 role reqs; roadmap_kb: 6 RAG chunks
 - **Embeddings:** BGE-local + BM25 + local cross-encoder reranker — offline, no keys
-- **LLM:** Gemini (dev) / Anthropic — behind port; ⚠ dev Gemini key returns 429 on generateContent (free quota)
+- **LLM:** Groq (dev, `LLM_PROVIDER=groq`, llama-3.1-8b + llama-3.3-70b) / Gemini / Anthropic — behind port. Gemini free key 429s; Groq works.
 - **RAG eval baseline:** hit@1 1.0, MRR 1.0, recall@5 1.0 (n=10)
 
 ---
 
-## Week 7 — LangGraph + Planner/Chat Agents  ✅ (code) · ⚠ live LLM blocked
+## Week 7 — LangGraph + Planner/Chat Agents  ✅ (live-verified via Groq)
 **Goal:** planner routes; chat answers grounded.
 
-- ✅ LLM port + adapters: Gemini (httpx, retry/backoff on 429/503), Anthropic (httpx), FakeLLM for tests.
-- ✅ LLM tiering (fast/balanced/deep) + provider factory.
+- ✅ LLM port + adapters: Groq + Gemini + Anthropic (all httpx, 429/503 retry+backoff), FakeLLM for tests.
+- ✅ LLM tiering (fast/balanced/deep) + provider factory (groq default for dev).
 - ✅ Planner agent: LLM JSON intent classification + keyword heuristic fallback.
 - ✅ Chat agent: retrieve → format context → grounded answer with [n] citations.
 - ✅ LangGraph StateGraph: planner → chat; role-aware retrieval filter + unfiltered fallback.
 - ✅ Orchestrator singleton + `POST /chat/ask` endpoint (authed, non-streaming).
-- ✅ 4 agent tests (32 total) with FakeLLM + in-memory Qdrant — full graph verified. ruff + mypy clean.
-- ⚠ **Live Gemini blocked:** free-tier `generateContent` returns 429 for the dev key (models.list 200 is a separate looser quota). Pipeline wiring proven by unit tests; live green pending a working LLM key.
-- **Exit:** planner routes + chat answers grounded — verified with FakeLLM; live LLM run pending key/quota.
+- ✅ 4 agent tests (32 total) with FakeLLM + in-memory Qdrant. ruff + mypy clean.
+- ✅ **Live-verified (Groq):** "how to become an ML engineer" + "apps with LLMs/RAG" → planner routes skill_path, chat returns grounded answers with correct citations.
+- **Exit:** planner routes + chat answers grounded — live. ✔
+- 🟡 Debt: planner returns role as display text not slug → role filter misses, unfiltered fallback used. Normalize in Week 9 skill-path.
 
 ---
 

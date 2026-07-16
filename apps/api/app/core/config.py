@@ -43,6 +43,9 @@ class Settings(BaseSettings):
     anthropic_model_fast: str = "claude-haiku-4-5-20251001"
     anthropic_model_balanced: str = "claude-sonnet-5"
     anthropic_model_deep: str = "claude-opus-4-8"
+    groq_model_fast: str = "llama-3.1-8b-instant"
+    groq_model_balanced: str = "llama-3.3-70b-versatile"
+    groq_model_deep: str = "llama-3.3-70b-versatile"
     llm_max_tokens: int = 1024
     langsmith_tracing: bool = False
 

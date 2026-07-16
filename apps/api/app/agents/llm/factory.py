@@ -5,6 +5,7 @@ from functools import lru_cache
 
 from app.agents.llm.anthropic import AnthropicClient
 from app.agents.llm.gemini import GeminiClient
+from app.agents.llm.groq import GroqClient
 from app.agents.llm.port import LLMClient, Tier
 from app.core.config import Settings, get_settings
 
@@ -17,6 +18,13 @@ def build_llm(settings: Settings) -> LLMClient:
             "deep": settings.gemini_model_deep,
         }
         return GeminiClient(settings.gemini_api_key, models)
+    if settings.llm_provider == "groq":
+        gmodels: dict[Tier, str] = {
+            "fast": settings.groq_model_fast,
+            "balanced": settings.groq_model_balanced,
+            "deep": settings.groq_model_deep,
+        }
+        return GroqClient(settings.groq_api_key, gmodels)
     if settings.llm_provider == "anthropic":
         amodels: dict[Tier, str] = {
             "fast": settings.anthropic_model_fast,
