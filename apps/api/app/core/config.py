@@ -36,6 +36,16 @@ class Settings(BaseSettings):
     rerank_enabled: bool = True
     rerank_model: str = "Xenova/ms-marco-MiniLM-L-6-v2"
 
+    # LLM tier models (per provider)
+    gemini_model_fast: str = "gemini-2.0-flash"
+    gemini_model_balanced: str = "gemini-2.0-flash"
+    gemini_model_deep: str = "gemini-2.0-flash"
+    anthropic_model_fast: str = "claude-haiku-4-5-20251001"
+    anthropic_model_balanced: str = "claude-sonnet-5"
+    anthropic_model_deep: str = "claude-opus-4-8"
+    llm_max_tokens: int = 1024
+    langsmith_tracing: bool = False
+
     # Datastores
     database_url: str = "postgresql+psycopg://app:app@localhost:5432/app"
     redis_url: str = "redis://localhost:6379/0"

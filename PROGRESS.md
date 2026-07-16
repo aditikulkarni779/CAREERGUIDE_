@@ -8,16 +8,32 @@ Newest entries at top. One entry per work session/day.
 ---
 
 ## Status Snapshot
-- **Current phase:** Phase 3 (Agent Orchestrator + Chat) — up next
+- **Current phase:** Phase 3 (Agent Orchestrator + Chat)
 - **Milestones hit:** M1 (infra+auth), M2 (Twin+onboarding), M3 (grounded RAG + citations + eval baseline)
-- **Next up:** Week 7 — LangGraph core + Planner/Chat agents
+- **Next up:** Week 8 — streaming chat (SSE) + conversation persistence + long-term memory
 - **Stack live:** Postgres, Redis, Qdrant, Neo4j, MinIO (Docker, all healthy)
 - **Repo:** github.com/aditikulkarni779/CAREERGUIDE_ (main pushed through W4)
-- **Test count:** 28 passing (sqlite + in-memory Qdrant) · ruff + mypy clean
+- **Test count:** 32 passing (sqlite + in-memory Qdrant + FakeLLM) · ruff + mypy clean
 - **Migrations applied:** 0001 (users), 0002 (profiles/skills/roles), 0003 (readiness_scores)
 - **Seed data:** 46 skills, 8 roles, 60 role reqs; roadmap_kb: 6 RAG chunks
-- **Embeddings:** BGE-local (384-dim) + BM25 sparse + local cross-encoder reranker — offline, no keys
-- **RAG eval baseline:** hit@1 1.0, MRR 1.0, recall@5 1.0 (n=10) — `apps/api/docs/rag_eval_baseline.json`
+- **Embeddings:** BGE-local + BM25 + local cross-encoder reranker — offline, no keys
+- **LLM:** Gemini (dev) / Anthropic — behind port; ⚠ dev Gemini key returns 429 on generateContent (free quota)
+- **RAG eval baseline:** hit@1 1.0, MRR 1.0, recall@5 1.0 (n=10)
+
+---
+
+## Week 7 — LangGraph + Planner/Chat Agents  ✅ (code) · ⚠ live LLM blocked
+**Goal:** planner routes; chat answers grounded.
+
+- ✅ LLM port + adapters: Gemini (httpx, retry/backoff on 429/503), Anthropic (httpx), FakeLLM for tests.
+- ✅ LLM tiering (fast/balanced/deep) + provider factory.
+- ✅ Planner agent: LLM JSON intent classification + keyword heuristic fallback.
+- ✅ Chat agent: retrieve → format context → grounded answer with [n] citations.
+- ✅ LangGraph StateGraph: planner → chat; role-aware retrieval filter + unfiltered fallback.
+- ✅ Orchestrator singleton + `POST /chat/ask` endpoint (authed, non-streaming).
+- ✅ 4 agent tests (32 total) with FakeLLM + in-memory Qdrant — full graph verified. ruff + mypy clean.
+- ⚠ **Live Gemini blocked:** free-tier `generateContent` returns 429 for the dev key (models.list 200 is a separate looser quota). Pipeline wiring proven by unit tests; live green pending a working LLM key.
+- **Exit:** planner routes + chat answers grounded — verified with FakeLLM; live LLM run pending key/quota.
 
 ---
 

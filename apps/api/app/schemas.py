@@ -130,3 +130,22 @@ class OnboardingResultOut(BaseModel):
     readiness: ReadinessOut
     added_skills: list[str]
     skipped_skills: list[str]
+
+
+# ---- Chat ----
+class ChatAsk(BaseModel):
+    query: str = Field(min_length=1, max_length=2000)
+
+
+class CitationOut(BaseModel):
+    title: str
+    source: str
+    url: str | None
+    snippet: str
+
+
+class ChatResponse(BaseModel):
+    answer: str
+    intent: str
+    target_role: str | None
+    citations: list[CitationOut]
