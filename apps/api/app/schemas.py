@@ -94,3 +94,39 @@ class UserSkillOut(BaseModel):
     source: SkillSource
 
     model_config = {"from_attributes": True}
+
+
+# ---- Onboarding / Readiness ----
+class OnboardingSkill(BaseModel):
+    name: str = Field(min_length=1, max_length=120)
+    proficiency: int = Field(default=50, ge=0, le=100)
+
+
+class OnboardingRequest(BaseModel):
+    education: list[Any] | None = None
+    learning_style: str | None = Field(default=None, max_length=50)
+    weekly_hours: int | None = Field(default=None, ge=0, le=168)
+    target_companies: list[str] | None = None
+    expected_salary: int | None = Field(default=None, ge=0)
+    interests: list[str] | None = None
+    career_goal: str | None = Field(default=None, max_length=200)
+    languages: list[str] = Field(default_factory=list)
+    frameworks: list[str] = Field(default_factory=list)
+    skills: list[OnboardingSkill] = Field(default_factory=list)
+    github_username: str | None = Field(default=None, max_length=100)
+
+
+class ReadinessOut(BaseModel):
+    overall: int
+    components: dict[str, Any]
+    target_role_slug: str | None
+    computed_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+class OnboardingResultOut(BaseModel):
+    profile_id: uuid.UUID
+    readiness: ReadinessOut
+    added_skills: list[str]
+    skipped_skills: list[str]

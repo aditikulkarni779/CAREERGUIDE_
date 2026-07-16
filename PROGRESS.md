@@ -8,14 +8,29 @@ Newest entries at top. One entry per work session/day.
 ---
 
 ## Status Snapshot
-- **Current phase:** Phase 1 (Career Twin & Onboarding)
-- **Milestones hit:** M1 (infra + auth)
-- **Next up:** Week 4 — onboarding wizard + readiness score v1 → M2
+- **Current phase:** Phase 2 (RAG Core) — up next
+- **Milestones hit:** M1 (infra + auth), M2 (Career Twin + onboarding)
+- **Next up:** Week 5 — RAG core (Qdrant + embeddings + hybrid search)
 - **Stack live:** Postgres, Redis, Qdrant, Neo4j, MinIO (Docker, all healthy)
-- **Latest commit:** `e59abb1`
-- **Test count:** 16 passing (sqlite) · ruff + mypy clean
-- **Migrations applied:** 0001 (users), 0002 (profiles/skills/roles)
+- **Repo:** github.com/aditikulkarni779/CAREERGUIDE_ (main pushed)
+- **Latest commit:** (Week 4 — see below)
+- **Test count:** 21 passing (sqlite) · ruff + mypy clean
+- **Migrations applied:** 0001 (users), 0002 (profiles/skills/roles), 0003 (readiness_scores)
 - **Seed data:** 46 skills, 8 roles, 60 role requirements
+
+---
+
+## Week 4 — Onboarding & Readiness v1  ✅ **M2**
+**Goal:** onboarding wizard → Twin persisted → dashboard shows radar + readiness.
+
+- ✅ ReadinessScore model + migration `0003` (applied to Postgres).
+- ✅ Readiness v1 (skills-only): role-requirement coverage weighted by importance; component placeholders for resume/github/etc.
+- ✅ Onboarding service: build Twin (profile fields + bulk skill canonicalization), skips unknown skills.
+- ✅ Endpoints: `POST /profile/onboarding`, `GET /profile/readiness`.
+- ✅ Frontend: 6-step onboarding wizard, dashboard with inline-SVG ScoreGauge + SkillRadar (no chart deps), skill chips.
+- ✅ 5 onboarding/readiness tests (21 total). ruff + mypy clean. web tsc clean.
+- ✅ **Verified in browser end-to-end:** register → onboarding → dashboard shows readiness 48/100 (ml-engineer) + 4-axis radar + 6 skills.
+- **Exit:** **M2** — onboarding → Twin → dashboard radar + readiness. ✔
 
 ---
 

@@ -165,3 +165,18 @@ class RoleSkillRequirement(Base):
     importance: Mapped[int] = mapped_column(SmallInteger, default=50)  # 0-100
     typical_proficiency: Mapped[int] = mapped_column(SmallInteger, default=60)  # 0-100
     difficulty: Mapped[int] = mapped_column(SmallInteger, default=50)  # 0-100
+
+
+class ReadinessScore(Base):
+    """A computed Career Readiness snapshot (weighted, explainable components)."""
+
+    __tablename__ = "readiness_scores"
+
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
+    profile_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("profiles.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    overall: Mapped[int] = mapped_column(SmallInteger, default=0)  # 0-100
+    components: Mapped[dict[str, Any] | None] = mapped_column(JSON, default=dict)
+    target_role_slug: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    computed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)

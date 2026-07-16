@@ -7,7 +7,16 @@ from sqlalchemy.orm import Session
 from app.adapters.db import get_db
 from app.adapters.models import Skill, User
 from app.api.deps import get_current_user
-from app.schemas import ProfileOut, ProfileUpdate, UserSkillCreate, UserSkillOut
+from app.schemas import (
+    OnboardingRequest,
+    OnboardingResultOut,
+    ProfileOut,
+    ProfileUpdate,
+    ReadinessOut,
+    UserSkillCreate,
+    UserSkillOut,
+)
+from app.services.onboarding_service import run_onboarding
 from app.services.profile_service import (
     ProfileError,
     get_or_create_profile,
@@ -15,8 +24,20 @@ from app.services.profile_service import (
     update_profile,
     upsert_user_skill,
 )
+from app.services.readiness_service import compute_readiness
 
 router = APIRouter(prefix="/profile", tags=["profile"])
+
+
+_PROFILE_FIELDS = (
+    "education",
+    "learning_style",
+    "weekly_hours",
+    "target_companies",
+    "expected_salary",
+    "interests",
+    "career_goal",
+)
 
 
 @router.get("", response_model=ProfileOut)
@@ -34,6 +55,36 @@ def put_profile(
 ) -> ProfileOut:
     profile = update_profile(db, user.id, data.model_dump(exclude_unset=True))
     return ProfileOut.model_validate(profile)
+
+
+@router.post("/onboarding", response_model=OnboardingResultOut, status_code=status.HTTP_201_CREATED)
+def onboarding(
+    data: OnboardingRequest,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> OnboardingResultOut:
+    profile_fields = {
+        k: v for k, v in data.model_dump(include=set(_PROFILE_FIELDS)).items() if v is not None
+    }
+    skills: list[tuple[str, int]] = [(s.name, s.proficiency) for s in data.skills]
+    skills += [(name, 50) for name in data.languages]
+    skills += [(name, 50) for name in data.frameworks]
+
+    result = run_onboarding(db, user.id, profile_fields, skills)
+    return OnboardingResultOut(
+        profile_id=result.profile_id,
+        readiness=ReadinessOut.model_validate(result.readiness),
+        added_skills=result.added_skills,
+        skipped_skills=result.skipped_skills,
+    )
+
+
+@router.get("/readiness", response_model=ReadinessOut)
+def readiness(
+    user: User = Depends(get_current_user), db: Session = Depends(get_db)
+) -> ReadinessOut:
+    profile = get_or_create_profile(db, user.id)
+    return ReadinessOut.model_validate(compute_readiness(db, profile))
 
 
 @router.get("/skills", response_model=list[UserSkillOut])
