@@ -24,6 +24,7 @@ Not a chatbot. The chat is one interface into a larger reasoning + recommendatio
 | 11 | [11_DEPLOYMENT_MLOPS.md](./11_DEPLOYMENT_MLOPS.md) | Deploy, CI/CD, observability |
 | 12 | [12_ROADMAP_MILESTONES.md](./12_ROADMAP_MILESTONES.md) | Phased build plan + milestones |
 | 13 | [13_EXECUTION_PLAN.md](./13_EXECUTION_PLAN.md) | Week-by-week execution plan (24 wks) |
+| — | [PROGRESS.md](./PROGRESS.md) | Running build progress log (updated each session) |
 
 ---
 
