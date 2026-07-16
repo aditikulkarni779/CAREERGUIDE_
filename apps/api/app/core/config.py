@@ -23,8 +23,16 @@ class Settings(BaseSettings):
     anthropic_api_key: str = ""
 
     # Embeddings
-    embed_provider: Literal["gemini", "voyage", "bge_local"] = "gemini"
+    embed_provider: Literal["gemini", "voyage", "bge_local"] = "bge_local"
     voyage_api_key: str = ""
+    embed_model_dense: str = "BAAI/bge-small-en-v1.5"  # 384-dim
+    embed_model_sparse: str = "Qdrant/bm25"
+    embed_cache_ttl_sec: int = 604800  # 7 days
+
+    # RAG / vector store
+    qdrant_collection_prefix: str = "cc"
+    rag_top_k: int = 20
+    rag_final_k: int = 8
 
     # Datastores
     database_url: str = "postgresql+psycopg://app:app@localhost:5432/app"

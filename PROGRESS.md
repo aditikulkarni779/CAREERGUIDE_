@@ -8,15 +8,29 @@ Newest entries at top. One entry per work session/day.
 ---
 
 ## Status Snapshot
-- **Current phase:** Phase 2 (RAG Core) — up next
+- **Current phase:** Phase 2 (RAG Core) — vector infra done
 - **Milestones hit:** M1 (infra + auth), M2 (Career Twin + onboarding)
-- **Next up:** Week 5 — RAG core (Qdrant + embeddings + hybrid search)
+- **Next up:** Week 6 — first real KB ingest + reranker + RAG eval baseline (→ M3)
 - **Stack live:** Postgres, Redis, Qdrant, Neo4j, MinIO (Docker, all healthy)
-- **Repo:** github.com/aditikulkarni779/CAREERGUIDE_ (main pushed)
-- **Latest commit:** (Week 4 — see below)
-- **Test count:** 21 passing (sqlite) · ruff + mypy clean
+- **Repo:** github.com/aditikulkarni779/CAREERGUIDE_ (main pushed through W4)
+- **Test count:** 25 passing (sqlite + in-memory Qdrant) · ruff + mypy clean
 - **Migrations applied:** 0001 (users), 0002 (profiles/skills/roles), 0003 (readiness_scores)
-- **Seed data:** 46 skills, 8 roles, 60 role requirements
+- **Seed data:** 46 skills, 8 roles, 60 role requirements; roadmap_kb: 6 RAG chunks
+- **Embeddings:** BGE-local (`bge-small-en-v1.5`, 384-dim) + BM25 sparse — offline, no keys
+
+---
+
+## Week 5 — RAG Core (vector infra + embeddings)  ✅
+**Goal:** hybrid retrieval machinery behind ports; local + free.
+
+- ✅ Ports: `DenseEmbedder`, `SparseEmbedder`, `VectorStore`, `Reranker` (interfaces only).
+- ✅ Chunker: paragraph-aware, word-budgeted, overlap, payload-carrying.
+- ✅ Embeddings: BGE-local dense + BM25 sparse (fastembed); Redis embedding cache; deterministic fake embedder for tests.
+- ✅ Qdrant adapter: named dense+sparse vectors, hybrid search via RRF fusion, payload filters.
+- ✅ Retriever entrypoint + ingestion pipeline + factory wiring.
+- ✅ 4 RAG tests (in-memory Qdrant + fake embedder, no network) — 25 total. ruff + mypy clean.
+- ✅ **Live verified:** BGE + Qdrant docker — ingest 6 roadmap chunks, hybrid retrieve ranks correct role #1 for 2 queries.
+- **Exit:** `retrieve()` returns ranked, filtered chunks; local + free. ✔ (reranker + eval baseline → Week 6)
 
 ---
 
@@ -102,4 +116,6 @@ Newest entries at top. One entry per work session/day.
 - User `.env` has inline comments on lines 6–7 → harmless python-dotenv warning; re-copy cleaned `.env.example` to silence.
 - Web build not yet run in CI locally (needs `npm install`); UI verified manually.
 - OAuth (GitHub/Google) coded but untested — needs `OAUTH_*` creds.
-- Dev DB has test users (`smoke@`, `uitest@`, `w3@`) — harmless.
+- Dev DB has test users (`smoke@`, `uitest@`, `w3@`, `w4ui@`) — harmless.
+- Windows symlink warning on fastembed model cache (dev mode off) — harmless, caching works.
+- Reranker port defined but no adapter yet (Week 6).
