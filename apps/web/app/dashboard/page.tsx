@@ -4,9 +4,19 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { GapHeatmap } from "@/components/GapHeatmap";
+import { RoadmapTimeline } from "@/components/RoadmapTimeline";
 import { ScoreGauge } from "@/components/ScoreGauge";
 import { SkillRadar } from "@/components/SkillRadar";
-import { api, tokenStore, type Readiness, type User, type UserSkill } from "@/lib/api";
+import {
+  api,
+  tokenStore,
+  type Readiness,
+  type RoadmapFull,
+  type SkillGap,
+  type User,
+  type UserSkill,
+} from "@/lib/api";
 
 const CATEGORY_LABEL: Record<string, string> = {
   language: "Languages",
@@ -38,6 +48,8 @@ export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null);
   const [readiness, setReadiness] = useState<Readiness | null>(null);
   const [skills, setSkills] = useState<UserSkill[]>([]);
+  const [gaps, setGaps] = useState<SkillGap[]>([]);
+  const [roadmap, setRoadmap] = useState<RoadmapFull | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -57,6 +69,9 @@ export default function DashboardPage() {
         router.push("/login");
       })
       .finally(() => setLoading(false));
+    // best-effort: gaps + roadmap need a career goal / existing roadmap
+    api.gapAnalysis().then(setGaps).catch(() => {});
+    api.getRoadmap().then(setRoadmap).catch(() => {});
   }, [router]);
 
   if (loading) return <main className="p-8 text-gray-500">Loading…</main>;
@@ -116,6 +131,34 @@ export default function DashboardPage() {
           <SkillRadar axes={radarAxes(skills)} />
         </div>
       </section>
+
+      {roadmap && (
+        <section className="rounded-xl border border-gray-200 p-6">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-gray-500">Learning Roadmap</h2>
+            <Link href="/roadmap" className="text-xs text-gray-500 underline">
+              Open roadmap →
+            </Link>
+          </div>
+          <RoadmapTimeline roadmap={roadmap} />
+        </section>
+      )}
+
+      {gaps.length > 0 && (
+        <section className="rounded-xl border border-gray-200 p-6">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-gray-500">
+              Skill Gaps {readiness?.target_role_slug ? `· ${readiness.target_role_slug}` : ""}
+            </h2>
+            {!roadmap && (
+              <Link href="/roadmap" className="text-xs text-gray-500 underline">
+                Generate roadmap →
+              </Link>
+            )}
+          </div>
+          <GapHeatmap gaps={gaps} />
+        </section>
+      )}
 
       <section className="rounded-xl border border-gray-200 p-6">
         <div className="mb-3 flex items-center justify-between">

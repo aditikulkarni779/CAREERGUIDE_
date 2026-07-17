@@ -63,6 +63,53 @@ export type OnboardingResult = {
   skipped_skills: string[];
 };
 
+export type RoadmapStatus = "todo" | "doing" | "done" | "skipped";
+
+export type Explanation = { why?: string; addresses?: string; impact?: string; confidence?: number };
+
+export type RoadmapItemFull = {
+  id: string;
+  skill_name: string;
+  order_index: number;
+  milestone: number;
+  est_hours: number;
+  difficulty: number;
+  importance: number;
+  status: RoadmapStatus;
+  explanation: Explanation;
+};
+
+export type RoadmapFull = {
+  id: string;
+  target_role_slug: string;
+  target_role_name: string;
+  version: number;
+  status: string;
+  rationale: Record<string, unknown>;
+  items: RoadmapItemFull[];
+};
+
+export type RoadmapVersion = {
+  id: string;
+  target_role_name: string;
+  version: number;
+  status: string;
+};
+
+export type SkillGap = {
+  skill_slug: string;
+  skill_name: string;
+  importance: number;
+  current: number;
+  target: number;
+  gap: number;
+  difficulty: number;
+  est_hours: number;
+  confidence: number;
+  order_index: number;
+  explanation: Explanation;
+};
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
     ...init,
@@ -113,6 +160,28 @@ export const api = {
   getReadiness: () => authed<Readiness>("/profile/readiness"),
 
   getSkills: () => authed<UserSkill[]>("/profile/skills"),
+
+  gapAnalysis: (targetRole?: string) =>
+    authed<SkillGap[]>("/gap-analysis", {
+      method: "POST",
+      body: JSON.stringify({ target_role: targetRole ?? null }),
+    }),
+
+  getRoadmap: () => authed<RoadmapFull>("/roadmap"),
+
+  generateRoadmap: (targetRole?: string) =>
+    authed<RoadmapFull>("/roadmap/generate", {
+      method: "POST",
+      body: JSON.stringify({ target_role: targetRole ?? null }),
+    }),
+
+  getRoadmapVersions: () => authed<RoadmapVersion[]>("/roadmap/versions"),
+
+  patchRoadmapItem: (itemId: string, status: RoadmapStatus) =>
+    authed<RoadmapItemFull>(`/roadmap/items/${itemId}`, {
+      method: "PATCH",
+      body: JSON.stringify({ status }),
+    }),
 
   listConversations: () => authed<Conversation[]>("/conversations"),
 

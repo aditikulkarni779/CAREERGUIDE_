@@ -8,9 +8,9 @@ Newest entries at top. One entry per work session/day.
 ---
 
 ## Status Snapshot
-- **Current phase:** Phase 4 (Frontend Depth) — up next
+- **Current phase:** Phase 4 (Frontend Depth) — Week 10 done
 - **Milestones hit:** M1, M2, M3, **M4 (flagship: skill-path → roadmap)**
-- **Next up:** Week 10–11 — dashboard widgets + roadmap page + skills graph (frontend polish → M5)
+- **Next up:** Week 11 — chat polish, skills graph, roadmap versions UI, a11y (→ M5)
 - **Stack live:** Postgres, Redis, Qdrant, Neo4j, MinIO (Docker, all healthy)
 - **Repo:** github.com/aditikulkarni779/CAREERGUIDE_ (main pushed through W4)
 - **Test count:** 43 passing (sqlite + in-memory Qdrant + FakeLLM) · ruff + mypy clean
@@ -46,6 +46,19 @@ Addressed two honest gaps found in review:
 - ✅ **Roadmap dedupe**: `get_or_generate_roadmap` reuses the latest roadmap when role + Twin version are unchanged (no more a new version per chat). Twin version bumps on skill changes.
 - ✅ 2 new tests (45 total). ruff + mypy clean.
 - 🟡 Remaining honest-framing debt: (a) verification is advisory in the *streaming* path (runs after tokens sent) — reframe or move pre-stream; (b) est_hours / role weights are heuristics, not market data (real once job-market intelligence lands, Week 17).
+
+---
+
+## Week 10 — Frontend Depth (dashboard widgets + roadmap page)  ✅
+**Goal:** turn the working engine into real UI.
+
+- ✅ API client: gapAnalysis, getRoadmap, generateRoadmap, getRoadmapVersions, patchRoadmapItem + types.
+- ✅ Components (inline SVG/CSS, no chart deps): `GapHeatmap` (current→target bars), `RoadmapTimeline` (milestone columns + progress).
+- ✅ Roadmap page `/roadmap`: milestones, per-item status dropdown (todo/doing/done/skipped) with live persist, progress %, "Why this?" explanations, re-generate, versions count.
+- ✅ Dashboard wired: readiness gauge + skill radar + roadmap timeline + gap heatmap + skills; best-effort gap/roadmap fetch.
+- ✅ web tsc clean.
+- ✅ **Verified in browser (real API):** onboarded ML-Engineer user → dashboard shows 8-milestone timeline + 9-gap heatmap; roadmap page toggle "Python → done" → progress 1/9 (11%), persisted to Postgres.
+- **Exit:** startup-quality dashboard + roadmap UI. ✔ (chat polish, skills graph, a11y → Week 11)
 
 ---
 
