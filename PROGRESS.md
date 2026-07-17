@@ -8,13 +8,13 @@ Newest entries at top. One entry per work session/day.
 ---
 
 ## Status Snapshot
-- **Current phase:** Phase 5 (Resume & GitHub Intelligence) — resume done
+- **Current phase:** Phase 5 (Resume & GitHub Intelligence) — resume + github done
 - **Milestones hit:** M1, M2, M3, **M4 (flagship: skill-path → roadmap)**
-- **Next up:** Week 13 — GitHub Intelligence (repo/commit analysis + scores). Week 11 UI polish deferred (user focusing backend).
+- **Next up:** Week 14 — Readiness v2 (fold resume + github into overall score) → M6.
 - **Stack live:** Postgres, Redis, Qdrant, Neo4j, MinIO (Docker, all healthy)
 - **Repo:** github.com/aditikulkarni779/CAREERGUIDE_ (main pushed through W4)
-- **Test count:** 57 passing (sqlite + in-memory Qdrant + FakeLLM) · ruff + mypy clean
-- **Migrations applied:** 0001–0006 (…, roadmaps, resumes/resume_scores)
+- **Test count:** 60 passing (sqlite + in-memory Qdrant + FakeLLM) · ruff + mypy clean
+- **Migrations applied:** 0001–0007 (…, resumes, github_profiles)
 - **Seed data:** 46 skills, 8 roles, 60 role reqs; **roadmap_kb: 55 chunks (37 real Wikipedia articles + 6 curated)**
 - **Embeddings:** BGE-local + BM25 + local cross-encoder reranker — offline, no keys
 - **LLM:** Groq (dev, `LLM_PROVIDER=groq`) / Gemini / Anthropic — behind port, streaming
@@ -46,6 +46,21 @@ Addressed two honest gaps found in review:
 - ✅ **Roadmap dedupe**: `get_or_generate_roadmap` reuses the latest roadmap when role + Twin version are unchanged (no more a new version per chat). Twin version bumps on skill changes.
 - ✅ 2 new tests (45 total). ruff + mypy clean.
 - 🟡 Remaining honest-framing debt: (a) verification is advisory in the *streaming* path (runs after tokens sent) — reframe or move pre-stream; (b) est_hours / role weights are heuristics, not market data (real once job-market intelligence lands, Week 17).
+
+---
+
+## Week 13 — GitHub Intelligence  ✅ (backend)
+**Goal:** analyze GitHub → recruiter-style scores → feed the Twin.
+
+- ✅ GitHub adapter (httpx → api.github.com, token auth, 404/403 handling); `github_profiles` table (migration 0007).
+- ✅ Deterministic scores: **repository, diversity, activity/health, recruiter-impression** (0-100) from repos + profile signals.
+- ✅ Language → skill mapping into the Twin (source=github); 24h cache (`get_or_analyze`).
+- ✅ GitHub agent (LLM): recruiter-impression narration + improvement tips (scores stay deterministic).
+- ✅ Endpoints: `POST /github/analyze {username}`, `GET /github`.
+- ✅ 3 new tests (60 total). ruff + mypy clean.
+- ✅ **Live-verified (real GitHub + Groq):** torvalds → recruiter 72 (repo 81, health 99); aditikulkarni779 → recruiter 34 — scores discriminate; LLM narration honest; skills mapped; cache works.
+- **Exit:** username → 4 scores + summary, skills into Twin. ✔
+- 🟡 Note: no GitHub UI yet (backend focus). Readiness integration of resume+github → Week 14.
 
 ---
 

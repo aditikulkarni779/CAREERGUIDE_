@@ -257,6 +257,28 @@ class ResumeScore(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
 
 
+class GithubProfile(Base):
+    __tablename__ = "github_profiles"
+
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
+    profile_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("profiles.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    username: Mapped[str] = mapped_column(String(100), nullable=False)
+    name: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    bio: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    followers: Mapped[int] = mapped_column(Integer, default=0)
+    public_repos: Mapped[int] = mapped_column(Integer, default=0)
+    health_score: Mapped[int] = mapped_column(SmallInteger, default=0)
+    repo_score: Mapped[int] = mapped_column(SmallInteger, default=0)
+    diversity_score: Mapped[int] = mapped_column(SmallInteger, default=0)
+    recruiter_score: Mapped[int] = mapped_column(SmallInteger, default=0)
+    languages: Mapped[list[Any] | None] = mapped_column(JSON, default=list)
+    top_repos: Mapped[list[Any] | None] = mapped_column(JSON, default=list)
+    summary: Mapped[str | None] = mapped_column(String, nullable=True)
+    fetched_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
+
+
 class MessageRole(str, enum.Enum):
     user = "user"
     assistant = "assistant"

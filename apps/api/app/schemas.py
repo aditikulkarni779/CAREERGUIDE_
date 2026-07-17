@@ -261,3 +261,25 @@ class ResumeRewriteOut(BaseModel):
     improved_bullets: list[str]
     keyword_suggestions: list[str]
     summary_feedback: str
+
+
+# ---- GitHub ----
+class GithubAnalyzeRequest(BaseModel):
+    username: str = Field(min_length=1, max_length=100)
+
+
+class GithubOut(BaseModel):
+    username: str
+    name: str | None
+    bio: str | None
+    followers: int
+    public_repos: int
+    repo_score: int
+    diversity_score: int
+    health_score: int
+    recruiter_score: int
+    languages: list[str]
+    top_repos: list[dict[str, Any]]
+    summary: str | None
+
+    model_config = {"from_attributes": True}

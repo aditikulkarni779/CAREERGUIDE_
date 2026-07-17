@@ -57,6 +57,9 @@ class Settings(BaseSettings):
     neo4j_user: str = "neo4j"
     neo4j_password: str = "password"
 
+    # Integrations
+    github_token: str = ""
+
     # Object storage (MinIO / S3)
     s3_endpoint: str = "http://localhost:9000"
     s3_access_key: str = "minioadmin"
