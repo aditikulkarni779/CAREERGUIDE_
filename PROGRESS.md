@@ -8,13 +8,13 @@ Newest entries at top. One entry per work session/day.
 ---
 
 ## Status Snapshot
-- **Current phase:** Phase 4 (Frontend Depth) — Week 10 done
+- **Current phase:** Phase 5 (Resume & GitHub Intelligence) — resume done
 - **Milestones hit:** M1, M2, M3, **M4 (flagship: skill-path → roadmap)**
-- **Next up:** Week 11 — chat polish, skills graph, roadmap versions UI, a11y (→ M5)
+- **Next up:** Week 13 — GitHub Intelligence (repo/commit analysis + scores). Week 11 UI polish deferred (user focusing backend).
 - **Stack live:** Postgres, Redis, Qdrant, Neo4j, MinIO (Docker, all healthy)
 - **Repo:** github.com/aditikulkarni779/CAREERGUIDE_ (main pushed through W4)
-- **Test count:** 43 passing (sqlite + in-memory Qdrant + FakeLLM) · ruff + mypy clean
-- **Migrations applied:** 0001–0005 (…, conversations/messages, roadmaps/roadmap_items)
+- **Test count:** 57 passing (sqlite + in-memory Qdrant + FakeLLM) · ruff + mypy clean
+- **Migrations applied:** 0001–0006 (…, roadmaps, resumes/resume_scores)
 - **Seed data:** 46 skills, 8 roles, 60 role reqs; **roadmap_kb: 55 chunks (37 real Wikipedia articles + 6 curated)**
 - **Embeddings:** BGE-local + BM25 + local cross-encoder reranker — offline, no keys
 - **LLM:** Groq (dev, `LLM_PROVIDER=groq`) / Gemini / Anthropic — behind port, streaming
@@ -46,6 +46,22 @@ Addressed two honest gaps found in review:
 - ✅ **Roadmap dedupe**: `get_or_generate_roadmap` reuses the latest roadmap when role + Twin version are unchanged (no more a new version per chat). Twin version bumps on skill changes.
 - ✅ 2 new tests (45 total). ruff + mypy clean.
 - 🟡 Remaining honest-framing debt: (a) verification is advisory in the *streaming* path (runs after tokens sent) — reframe or move pre-stream; (b) est_hours / role weights are heuristics, not market data (real once job-market intelligence lands, Week 17).
+
+---
+
+## Week 12 — Resume Intelligence  ✅ (backend)
+**Goal:** upload → parse → skill extraction → ATS score → weak sections → rewrite.
+
+- ✅ Object storage adapter (boto3 → MinIO/S3); `resumes` + `resume_scores` tables (migration 0006).
+- ✅ Parser: PDF (pypdf) / DOCX (python-docx) / TXT → plain text.
+- ✅ Skill extraction from resume text → canonical skills fed into the Twin (source=resume).
+- ✅ ATS scorer (deterministic): section detection (contact/summary/experience/education/skills/projects), role keyword coverage, format score → 0-100; missing-keywords vs target role.
+- ✅ Resume agent (LLM): quantified bullet rewrites + keyword suggestions + summary feedback.
+- ✅ Endpoints: `POST /resume` (multipart upload, 5MB cap), `GET /resume/{id}`, `GET /resume/{id}/score`, `POST /resume/{id}/rewrite`.
+- ✅ 5 new tests (57 total). ruff + mypy clean.
+- ✅ **Live-verified (MinIO + Groq):** upload → ATS 55, detected [Python, SQL, pandas, Docker, AWS], missing [ML, Deep Learning, PyTorch…]; rewrite → quantified bullets + keyword suggestions.
+- **Exit:** resume upload → ATS score + rewrites, skills flow into Twin. ✔
+- 🟡 Note: parse is synchronous (Celery worker deferred); no resume UI yet (backend focus).
 
 ---
 

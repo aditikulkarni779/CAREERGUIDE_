@@ -21,6 +21,10 @@ dependencies = [
     "fastembed>=0.4",
     "redis>=5.2",
     "langgraph>=0.2.45",
+    "pypdf>=5.1",
+    "python-docx>=1.1",
+    "boto3>=1.35",
+    "python-multipart>=0.0.12",
 ]
 
 [project.optional-dependencies]
@@ -54,6 +58,8 @@ extend-immutable-calls = [
     "fastapi.Path",
     "fastapi.Body",
     "fastapi.Header",
+    "fastapi.File",
+    "fastapi.Form",
     "fastapi.security.HTTPBearer",
 ]
 

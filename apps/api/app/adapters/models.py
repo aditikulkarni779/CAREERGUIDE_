@@ -229,6 +229,34 @@ class RoadmapItem(Base):
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
 
+class Resume(Base):
+    __tablename__ = "resumes"
+
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
+    profile_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("profiles.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    filename: Mapped[str] = mapped_column(String(255), nullable=False)
+    file_key: Mapped[str] = mapped_column(String(255), nullable=False)
+    text: Mapped[str] = mapped_column(String, default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
+
+
+class ResumeScore(Base):
+    __tablename__ = "resume_scores"
+
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
+    resume_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("resumes.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    ats_score: Mapped[int] = mapped_column(SmallInteger, default=0)
+    sections: Mapped[dict[str, Any] | None] = mapped_column(JSON, default=dict)
+    missing_keywords: Mapped[list[Any] | None] = mapped_column(JSON, default=list)
+    detected_skills: Mapped[list[Any] | None] = mapped_column(JSON, default=list)
+    suggestions: Mapped[dict[str, Any] | None] = mapped_column(JSON, default=dict)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
+
+
 class MessageRole(str, enum.Enum):
     user = "user"
     assistant = "assistant"

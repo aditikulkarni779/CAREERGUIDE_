@@ -57,6 +57,12 @@ class Settings(BaseSettings):
     neo4j_user: str = "neo4j"
     neo4j_password: str = "password"
 
+    # Object storage (MinIO / S3)
+    s3_endpoint: str = "http://localhost:9000"
+    s3_access_key: str = "minioadmin"
+    s3_secret_key: str = "minioadmin"
+    s3_bucket: str = "career-copilot"
+
     # Auth
     jwt_secret: str = "change-me-in-prod"
     jwt_algorithm: str = "HS256"

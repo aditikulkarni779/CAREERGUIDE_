@@ -230,3 +230,34 @@ class RoadmapVersionOut(BaseModel):
 
 class ItemStatusUpdate(BaseModel):
     status: RoadmapItemStatus
+
+
+# ---- Resume ----
+class ResumeScoreOut(BaseModel):
+    ats_score: int
+    sections: dict[str, bool]
+    missing_keywords: list[str]
+    detected_skills: list[str]
+
+    model_config = {"from_attributes": True}
+
+
+class ResumeUploadOut(BaseModel):
+    resume_id: uuid.UUID
+    filename: str
+    ats_score: int
+    detected_skills: list[str]
+    missing_keywords: list[str]
+
+
+class ResumeDetailOut(BaseModel):
+    id: uuid.UUID
+    filename: str
+    text_excerpt: str
+    score: ResumeScoreOut | None
+
+
+class ResumeRewriteOut(BaseModel):
+    improved_bullets: list[str]
+    keyword_suggestions: list[str]
+    summary_feedback: str
