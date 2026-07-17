@@ -182,6 +182,53 @@ class ReadinessScore(Base):
     computed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
 
 
+class RoadmapItemStatus(str, enum.Enum):
+    todo = "todo"
+    doing = "doing"
+    done = "done"
+    skipped = "skipped"
+
+
+class Roadmap(Base):
+    __tablename__ = "roadmaps"
+
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
+    profile_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("profiles.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    target_role_slug: Mapped[str] = mapped_column(String(120), nullable=False)
+    target_role_name: Mapped[str] = mapped_column(String(120), nullable=False)
+    version: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
+    status: Mapped[str] = mapped_column(String(20), default="active")
+    rationale: Mapped[dict[str, Any] | None] = mapped_column(JSON, default=dict)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
+
+
+class RoadmapItem(Base):
+    __tablename__ = "roadmap_items"
+
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
+    roadmap_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("roadmaps.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    skill_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("skills.id", ondelete="CASCADE"), nullable=False
+    )
+    skill_name: Mapped[str] = mapped_column(String(120), nullable=False)
+    order_index: Mapped[int] = mapped_column(Integer, default=0)
+    milestone: Mapped[int] = mapped_column(Integer, default=1)
+    est_hours: Mapped[int] = mapped_column(Integer, default=0)
+    difficulty: Mapped[int] = mapped_column(SmallInteger, default=50)
+    importance: Mapped[int] = mapped_column(SmallInteger, default=50)
+    status: Mapped[RoadmapItemStatus] = mapped_column(
+        Enum(RoadmapItemStatus, native_enum=False, length=20),
+        default=RoadmapItemStatus.todo,
+    )
+    explanation: Mapped[dict[str, Any] | None] = mapped_column(JSON, default=dict)
+    resources: Mapped[list[Any] | None] = mapped_column(JSON, default=list)
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
 class MessageRole(str, enum.Enum):
     user = "user"
     assistant = "assistant"

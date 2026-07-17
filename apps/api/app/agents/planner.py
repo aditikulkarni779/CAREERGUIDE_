@@ -6,6 +6,7 @@ import re
 
 from app.agents.llm.port import LLMClient, Message
 from app.agents.state import IntentName
+from app.services.skill_service import normalize_slug
 
 _INTENTS = ("chat", "skill_path", "resume", "github", "interview", "other")
 
@@ -57,7 +58,7 @@ class Planner:
             if intent not in _INTENTS:
                 intent = "chat"
             role = data.get("target_role")
-            role = None if role in (None, "null", "") else str(role)
+            role = None if role in (None, "null", "") else normalize_slug(str(role))
             return intent, role
         except Exception:  # noqa: BLE001 — fall back to heuristic on any LLM/parse failure
             return _heuristic(query)

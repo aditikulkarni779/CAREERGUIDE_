@@ -10,16 +10,19 @@ import uuid
 from collections.abc import Iterator
 from typing import Any
 
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.adapters.models import MessageRole
+from app.adapters.models import MessageRole, Profile
 from app.agents.llm.port import LLMClient, Message
 from app.agents.planner import Planner
 from app.agents.verification import Verifier
 from app.rag.retriever import Retriever
 from app.rag.types import Chunk
 from app.services.conversation_service import add_message
+from app.services.gap_service import resolve_role
 from app.services.memory_service import MemoryService
+from app.services.roadmap_service import generate_roadmap, get_items
 from app.services.skill_service import normalize_slug
 
 _SYSTEM = (
@@ -54,6 +57,41 @@ class ChatStreamer:
         self._verifier = verifier
         self._memory = memory
 
+    def _skill_path(
+        self, db: Session, user_id: str, role_slug: str | None
+    ) -> tuple[list[str], str]:
+        """Generate a roadmap for the user's Twin; return (sse_events, summary)."""
+        profile = db.scalar(select(Profile).where(Profile.user_id == uuid.UUID(user_id)))
+        role = resolve_role(db, role_slug)
+        if profile is None or role is None:
+            return [], ""
+        roadmap = generate_roadmap(db, profile, role)
+        items = get_items(db, roadmap.id)
+        event = _sse(
+            "roadmap",
+            {
+                "role": role.name,
+                "version": roadmap.version,
+                "total_hours": (roadmap.rationale or {}).get("total_hours", 0),
+                "items": [
+                    {
+                        "skill": it.skill_name,
+                        "milestone": it.milestone,
+                        "est_hours": it.est_hours,
+                        "importance": it.importance,
+                        "why": (it.explanation or {}).get("why", ""),
+                    }
+                    for it in items
+                ],
+            },
+        )
+        summary = "\n".join(
+            f"- Milestone {it.milestone}: {it.skill_name} (~{it.est_hours}h, "
+            f"importance {it.importance}/100)"
+            for it in items
+        )
+        return [event], summary
+
     def stream(
         self, db: Session, user_id: str, conversation_id: uuid.UUID, query: str
     ) -> Iterator[str]:
@@ -72,10 +110,19 @@ class ChatStreamer:
             chunks, citations = self._retriever.retrieve_with_citations(query, 6)
         yield _sse("agent_step", {"agent": "retriever", "found": len(chunks)})
 
+        # Skill-path workflow: compute gaps + generate a roadmap for the user's Twin.
+        roadmap_summary = ""
+        if intent == "skill_path":
+            events, roadmap_summary = self._skill_path(db, user_id, role_slug)
+            yield from events
+
         mem_text = "\n".join(f"- {m}" for m in memories)
         user_prompt = (
             f"User memory:\n{mem_text or 'none'}\n\n"
-            f"Context:\n{_format_context(chunks)}\n\nQuestion: {query}"
+            f"Context:\n{_format_context(chunks)}\n\n"
+            f"Roadmap generated for this user (reference it in your answer):\n"
+            f"{roadmap_summary or 'none'}\n\n"
+            f"Question: {query}"
         )
 
         answer_parts: list[str] = []

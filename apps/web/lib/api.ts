@@ -138,10 +138,26 @@ export type ChatMessage = {
   created_at: string;
 };
 
+export type RoadmapItem = {
+  skill: string;
+  milestone: number;
+  est_hours: number;
+  importance: number;
+  why: string;
+};
+
+export type RoadmapEvent = {
+  role: string;
+  version: number;
+  total_hours: number;
+  items: RoadmapItem[];
+};
+
 export type StreamHandlers = {
   onStep?: (data: Record<string, unknown>) => void;
   onToken?: (t: string) => void;
   onCitation?: (c: Citation) => void;
+  onRoadmap?: (r: RoadmapEvent) => void;
   onDone?: (data: Record<string, unknown>) => void;
   onError?: (err: string) => void;
 };
@@ -178,6 +194,7 @@ export async function streamMessage(
       const data = JSON.parse(dataLine.slice(6));
       if (event === "token") h.onToken?.(data.t);
       else if (event === "citation") h.onCitation?.(data);
+      else if (event === "roadmap") h.onRoadmap?.(data);
       else if (event === "agent_step") h.onStep?.(data);
       else if (event === "done") h.onDone?.(data);
     }

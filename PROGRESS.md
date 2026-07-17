@@ -8,17 +8,34 @@ Newest entries at top. One entry per work session/day.
 ---
 
 ## Status Snapshot
-- **Current phase:** Phase 3 (Agent Orchestrator + Chat) — chat experience done
-- **Milestones hit:** M1 (infra+auth), M2 (Twin+onboarding), M3 (grounded RAG + citations + eval baseline)
-- **Next up:** Week 9 — Skill Gap + Roadmap agents; skill-path workflow (→ M4, flagship demo)
+- **Current phase:** Phase 4 (Frontend Depth) — up next
+- **Milestones hit:** M1, M2, M3, **M4 (flagship: skill-path → roadmap)**
+- **Next up:** Week 10–11 — dashboard widgets + roadmap page + skills graph (frontend polish → M5)
 - **Stack live:** Postgres, Redis, Qdrant, Neo4j, MinIO (Docker, all healthy)
 - **Repo:** github.com/aditikulkarni779/CAREERGUIDE_ (main pushed through W4)
-- **Test count:** 38 passing (sqlite + in-memory Qdrant + FakeLLM) · ruff + mypy clean
-- **Migrations applied:** 0001–0004 (users, profiles/skills/roles, readiness, conversations/messages)
+- **Test count:** 43 passing (sqlite + in-memory Qdrant + FakeLLM) · ruff + mypy clean
+- **Migrations applied:** 0001–0005 (…, conversations/messages, roadmaps/roadmap_items)
 - **Seed data:** 46 skills, 8 roles, 60 role reqs; roadmap_kb: 6 RAG chunks
 - **Embeddings:** BGE-local + BM25 + local cross-encoder reranker — offline, no keys
-- **LLM:** Groq (dev, `LLM_PROVIDER=groq`) / Gemini / Anthropic — behind port, streaming supported
+- **LLM:** Groq (dev, `LLM_PROVIDER=groq`) / Gemini / Anthropic — behind port, streaming
 - **RAG eval baseline:** hit@1 1.0, MRR 1.0, recall@5 1.0 (n=10)
+
+---
+
+## Week 9 — Skill Gap + Roadmap + Skill-Path Workflow  ✅ **M4 (flagship)**
+**Goal:** "become an ML Engineer" → streamed answer + roadmap + citations + explanations.
+
+- ✅ Planner fix: role normalized to slug (Week 7 debt cleared → role filter works).
+- ✅ `roadmaps` + `roadmap_items` tables (migration 0005).
+- ✅ Gap analysis: Twin vs role reqs → scored gaps (importance, current/target, est_hours, difficulty, confidence, explanation); foundational-first ordering; covered skills excluded.
+- ✅ Roadmap generator: sequence gaps into milestones bucketed by weekly hours; versioned; rationale.
+- ✅ Endpoints: `POST /gap-analysis`, `POST /roadmap/generate`, `GET /roadmap`, `GET /roadmap/versions`, `PATCH /roadmap/items/{id}`.
+- ✅ Skill-path wired into chat stream: emits `roadmap` SSE event + folds roadmap into the answer.
+- ✅ Frontend: roadmap card rendered inline in chat (milestones, hours, importance).
+- ✅ 5 new tests (43 total). ruff + mypy clean; web tsc clean.
+- ✅ **Live-verified (Groq):** onboarded ML-Engineer user → chat "how to become an ML engineer" → `roadmap` event with 9 gap-based items across 8 milestones (~208h), persisted; grounded answer.
+- **Exit:** **M4** — flagship skill-path demo live. ✔
+- 🟡 Debt: verifier is strict — flags roadmap hour estimates as "unsupported" (they're computed, not from sources). Tune verifier to scope-check only factual claims. Neo4j prerequisite ordering deferred to Week 15 (currently importance/difficulty heuristic).
 
 ---
 

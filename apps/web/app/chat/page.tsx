@@ -11,12 +11,14 @@ import {
   type Citation,
   type Conversation,
   type ChatMessage,
+  type RoadmapEvent,
 } from "@/lib/api";
 
 type UiMessage = {
   role: "user" | "assistant";
   content: string;
   citations: Citation[];
+  roadmap?: RoadmapEvent;
   streaming?: boolean;
 };
 
@@ -106,6 +108,12 @@ export default function ChatPage() {
           copy[copy.length - 1] = { ...last, citations: [...last.citations, c] };
           return copy;
         }),
+      onRoadmap: (r) =>
+        setMessages((m) => {
+          const copy = [...m];
+          copy[copy.length - 1] = { ...copy[copy.length - 1], roadmap: r };
+          return copy;
+        }),
       onDone: () => {
         setMessages((m) => {
           const copy = [...m];
@@ -177,6 +185,28 @@ export default function ChatPage() {
                 }`}
               >
                 {m.content || (m.streaming ? "…" : "")}
+                {m.roadmap && (
+                  <div className="mt-3 rounded-lg border border-gray-200 bg-gray-50 p-3 text-xs">
+                    <div className="mb-2 font-semibold text-gray-700">
+                      📍 Roadmap → {m.roadmap.role} · ~{m.roadmap.total_hours}h total
+                    </div>
+                    <ol className="space-y-1">
+                      {m.roadmap.items.map((it, k) => (
+                        <li key={k} className="flex items-start gap-2">
+                          <span className="mt-0.5 rounded bg-gray-200 px-1.5 text-[10px] font-medium">
+                            M{it.milestone}
+                          </span>
+                          <span>
+                            <span className="font-medium">{it.skill}</span>{" "}
+                            <span className="text-gray-400">
+                              ~{it.est_hours}h · importance {it.importance}
+                            </span>
+                          </span>
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+                )}
                 {m.citations.length > 0 && (
                   <div className="mt-3 border-t border-gray-100 pt-2 text-xs text-gray-500">
                     <div className="mb-1 font-medium">Sources</div>

@@ -7,7 +7,7 @@ from typing import Any
 
 from pydantic import BaseModel, EmailStr, Field
 
-from app.adapters.models import SkillCategory, SkillSource, UserRole
+from app.adapters.models import RoadmapItemStatus, SkillCategory, SkillSource, UserRole
 
 
 class UserCreate(BaseModel):
@@ -172,3 +172,61 @@ class MessageOut(BaseModel):
 
 class SendMessage(BaseModel):
     content: str = Field(min_length=1, max_length=2000)
+
+
+# ---- Gap analysis / Roadmap ----
+class TargetRoleRequest(BaseModel):
+    target_role: str | None = None
+
+
+class SkillGapOut(BaseModel):
+    skill_slug: str
+    skill_name: str
+    importance: int
+    current: int
+    target: int
+    gap: int
+    difficulty: int
+    est_hours: int
+    confidence: float
+    order_index: int
+    explanation: dict[str, Any]
+
+
+class RoadmapItemOut(BaseModel):
+    id: uuid.UUID
+    skill_name: str
+    order_index: int
+    milestone: int
+    est_hours: int
+    difficulty: int
+    importance: int
+    status: RoadmapItemStatus
+    explanation: dict[str, Any]
+
+    model_config = {"from_attributes": True}
+
+
+class RoadmapOut(BaseModel):
+    id: uuid.UUID
+    target_role_slug: str
+    target_role_name: str
+    version: int
+    status: str
+    rationale: dict[str, Any]
+    items: list[RoadmapItemOut]
+
+    model_config = {"from_attributes": True}
+
+
+class RoadmapVersionOut(BaseModel):
+    id: uuid.UUID
+    target_role_name: str
+    version: int
+    status: str
+
+    model_config = {"from_attributes": True}
+
+
+class ItemStatusUpdate(BaseModel):
+    status: RoadmapItemStatus
