@@ -105,16 +105,14 @@ class ChatStreamer:
 
         memories = self._memory.recall(user_id, query) if self._memory else []
 
-        role_slug = normalize_slug(role) if role else None
-        filters = {"role": role_slug} if role_slug else None
-        chunks, citations = self._retriever.retrieve_with_citations(query, 6, filters)
-        if not chunks and filters:
-            chunks, citations = self._retriever.retrieve_with_citations(query, 6)
+        # Semantic retrieval over the real KB (Wikipedia + roadmaps); no role filter needed.
+        chunks, citations = self._retriever.retrieve_with_citations(query, 6)
         yield _sse("agent_step", {"agent": "retriever", "found": len(chunks)})
 
         # Skill-path workflow: compute gaps + generate a roadmap for the user's Twin.
         roadmap_summary = ""
         if intent == "skill_path":
+            role_slug = normalize_slug(role) if role else None
             events, roadmap_summary = self._skill_path(db, user_id, role_slug)
             yield from events
 

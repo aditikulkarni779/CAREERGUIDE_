@@ -15,10 +15,10 @@ Newest entries at top. One entry per work session/day.
 - **Repo:** github.com/aditikulkarni779/CAREERGUIDE_ (main pushed through W4)
 - **Test count:** 43 passing (sqlite + in-memory Qdrant + FakeLLM) · ruff + mypy clean
 - **Migrations applied:** 0001–0005 (…, conversations/messages, roadmaps/roadmap_items)
-- **Seed data:** 46 skills, 8 roles, 60 role reqs; roadmap_kb: 6 RAG chunks
+- **Seed data:** 46 skills, 8 roles, 60 role reqs; **roadmap_kb: 55 chunks (37 real Wikipedia articles + 6 curated)**
 - **Embeddings:** BGE-local + BM25 + local cross-encoder reranker — offline, no keys
 - **LLM:** Groq (dev, `LLM_PROVIDER=groq`) / Gemini / Anthropic — behind port, streaming
-- **RAG eval baseline:** hit@1 1.0, MRR 1.0, recall@5 1.0 (n=10)
+- **RAG eval baseline (real corpus):** hit@1 0.8, MRR 0.875, recall@5 1.0 (n=10) — honest metric
 
 ---
 
@@ -45,7 +45,22 @@ Addressed two honest gaps found in review:
 - ✅ **Multi-turn chat**: chat prompt now includes the last 6 conversation turns → follow-ups ("what's the first step?") keep context. Live-verified.
 - ✅ **Roadmap dedupe**: `get_or_generate_roadmap` reuses the latest roadmap when role + Twin version are unchanged (no more a new version per chat). Twin version bumps on skill changes.
 - ✅ 2 new tests (45 total). ruff + mypy clean.
-- 🟡 Remaining honest-framing debt: (a) verification is advisory in the *streaming* path (runs after tokens sent) — reframe or move pre-stream; (b) est_hours / role weights are heuristics, not market data (real once job-market intelligence lands, Week 17); (c) KB is 6 curated docs — pull real ingestion forward for credibility.
+- 🟡 Remaining honest-framing debt: (a) verification is advisory in the *streaming* path (runs after tokens sent) — reframe or move pre-stream; (b) est_hours / role weights are heuristics, not market data (real once job-market intelligence lands, Week 17).
+
+---
+
+## Real KB ingestion (closes review item #2)  ✅
+**Goal:** replace the 6-blurb KB with a real, cited corpus.
+
+- ✅ Wikipedia source: REST summary (reliable) + **batched action API** (full articles, 20/request, no throttle) + opensearch title resolution + redirect/normalization mapping.
+- ✅ `QdrantVectorStore.recreate_collection` for clean re-ingest.
+- ✅ Ingest pipeline: fetch article per taxonomy skill + role → chunk → embed → upsert, payload carries `source=wikipedia` + canonical `url` for citation/attribution (CC BY-SA 4.0).
+- ✅ Chat retrieval simplified to semantic-over-real-KB (dropped the tiny-KB role-filter crutch).
+- ✅ Result: **55 chunks from 37 real Wikipedia articles + 6 curated** (~9× the old KB).
+- ✅ 7 new tests (52 total). ruff + mypy clean.
+- ✅ **Live-verified (Groq):** "What is PyTorch?" cites the real PyTorch/TensorFlow/Machine-learning Wikipedia articles with clickable URLs.
+- ✅ Eval re-baselined honestly over the real corpus: hit@1 0.8, MRR 0.875, recall@5 1.0.
+- 🟡 Note: batched extracts return lead sections (not full articles) — richer full-text ingestion is a future tuning knob. ~17 topics skipped (no/ambiguous article: Qdrant, LangChain, FastAPI, etc.).
 
 ---
 

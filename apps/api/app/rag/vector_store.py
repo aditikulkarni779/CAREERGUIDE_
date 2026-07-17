@@ -27,6 +27,15 @@ class QdrantVectorStore:
     def _name(self, name: str) -> str:
         return f"{self._prefix}_{name}"
 
+    def delete_collection(self, name: str) -> None:
+        full = self._name(name)
+        if self._c.collection_exists(full):
+            self._c.delete_collection(full)
+
+    def recreate_collection(self, name: str) -> None:
+        self.delete_collection(name)
+        self.ensure_collection(name)
+
     def ensure_collection(self, name: str) -> None:
         full = self._name(name)
         if self._c.collection_exists(full):

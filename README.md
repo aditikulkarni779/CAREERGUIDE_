@@ -59,6 +59,12 @@ Python/FastAPI · LangGraph + Claude · Qdrant + Voyage (RAG) · PostgreSQL · N
 
 See [03_TECH_STACK.md](./03_TECH_STACK.md) for rationale.
 
+## Data Sources & Attribution
+
+The RAG knowledge base ingests article extracts from **Wikipedia** (via the MediaWiki
+REST/action API). Wikipedia content is licensed **CC BY-SA 4.0**; each ingested chunk
+stores the canonical article URL and surfaces it as a citation for attribution.
+
 ## Status
 
-Planning phase. No code yet. Build proceeds per [12_ROADMAP_MILESTONES.md](./12_ROADMAP_MILESTONES.md) after plan approval.
+In active development. Progress tracked in [PROGRESS.md](./PROGRESS.md). Build proceeds per [12_ROADMAP_MILESTONES.md](./12_ROADMAP_MILESTONES.md).
