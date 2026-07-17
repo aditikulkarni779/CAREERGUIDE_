@@ -35,7 +35,17 @@ Newest entries at top. One entry per work session/day.
 - ✅ 5 new tests (43 total). ruff + mypy clean; web tsc clean.
 - ✅ **Live-verified (Groq):** onboarded ML-Engineer user → chat "how to become an ML engineer" → `roadmap` event with 9 gap-based items across 8 milestones (~208h), persisted; grounded answer.
 - **Exit:** **M4** — flagship skill-path demo live. ✔
-- 🟡 Debt: verifier is strict — flags roadmap hour estimates as "unsupported" (they're computed, not from sources). Tune verifier to scope-check only factual claims. Neo4j prerequisite ordering deferred to Week 15 (currently importance/difficulty heuristic).
+- 🟡 Debt: verifier is strict — flags roadmap hour estimates as "unsupported" (they're computed, not from sources). Tune to scope-check only factual claims. Neo4j prerequisite ordering deferred to Week 15 (importance/difficulty heuristic for now).
+
+---
+
+## Post-M4 hardening — multi-turn + roadmap dedupe  ✅
+Addressed two honest gaps found in review:
+
+- ✅ **Multi-turn chat**: chat prompt now includes the last 6 conversation turns → follow-ups ("what's the first step?") keep context. Live-verified.
+- ✅ **Roadmap dedupe**: `get_or_generate_roadmap` reuses the latest roadmap when role + Twin version are unchanged (no more a new version per chat). Twin version bumps on skill changes.
+- ✅ 2 new tests (45 total). ruff + mypy clean.
+- 🟡 Remaining honest-framing debt: (a) verification is advisory in the *streaming* path (runs after tokens sent) — reframe or move pre-stream; (b) est_hours / role weights are heuristics, not market data (real once job-market intelligence lands, Week 17); (c) KB is 6 curated docs — pull real ingestion forward for credibility.
 
 ---
 

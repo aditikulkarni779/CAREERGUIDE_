@@ -51,6 +51,10 @@ def upsert_user_skill(
     skill = canonicalize(db, skill_name)
     if skill is None:
         raise ProfileError(f"unknown skill: {skill_name!r}")
+    # Skill changes alter the Career Twin -> bump version so roadmaps re-generate.
+    twin = db.get(Profile, profile_id)
+    if twin is not None:
+        twin.twin_version += 1
     existing = db.scalar(
         select(UserSkill).where(
             UserSkill.profile_id == profile_id, UserSkill.skill_id == skill.id

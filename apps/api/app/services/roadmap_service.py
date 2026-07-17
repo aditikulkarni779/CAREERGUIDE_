@@ -33,6 +33,7 @@ def generate_roadmap(db: Session, profile: Profile, role: Role) -> Roadmap:
             "num_items": len(gaps),
             "total_hours": sum(g.est_hours for g in gaps),
             "weekly_hours": weekly_hours,
+            "twin_version": profile.twin_version,
         },
     )
     db.add(roadmap)
@@ -63,6 +64,19 @@ def generate_roadmap(db: Session, profile: Profile, role: Role) -> Roadmap:
     db.commit()
     db.refresh(roadmap)
     return roadmap
+
+
+def get_or_generate_roadmap(db: Session, profile: Profile, role: Role) -> Roadmap:
+    """Reuse the latest roadmap if it's for the same role and the Twin is unchanged;
+    otherwise generate a new version. Prevents version spam on repeated chats."""
+    latest = latest_roadmap(db, profile.id)
+    if (
+        latest is not None
+        and latest.target_role_slug == role.slug
+        and (latest.rationale or {}).get("twin_version") == profile.twin_version
+    ):
+        return latest
+    return generate_roadmap(db, profile, role)
 
 
 def latest_roadmap(db: Session, profile_id: uuid.UUID) -> Roadmap | None:

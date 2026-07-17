@@ -97,6 +97,33 @@ def test_stream_emits_events_and_persists(db_session: Session) -> None:
     assert msgs[1].citations
 
 
+def test_stream_includes_prior_turns(db_session: Session) -> None:
+    from app.adapters.models import User
+
+    captured: dict[str, int] = {}
+
+    def handler(system: str, messages: list[Message], tier: Tier) -> str:
+        if "router" in system.lower():
+            return '{"intent": "chat", "target_role": null}'
+        if "fact-checker" in system.lower():
+            return '{"supported": true, "reason": "ok"}'
+        captured["n"] = len(messages)  # chat call
+        return "answer"
+
+    user = User(email="mt@example.com")
+    db_session.add(user)
+    db_session.commit()
+    conv = create_conversation(db_session, user.id)
+    streamer = ChatStreamer(FakeLLM(handler), _retriever(), Verifier(FakeLLM(handler)), memory=None)
+
+    list(streamer.stream(db_session, str(user.id), conv.id, "first question"))
+    assert captured["n"] == 1  # only the current augmented turn
+
+    list(streamer.stream(db_session, str(user.id), conv.id, "follow-up question"))
+    # 2 prior (user+assistant from turn 1) + current augmented = 3
+    assert captured["n"] == 3
+
+
 # ---- Verifier ----
 def test_verifier_supported() -> None:
     v = Verifier(FakeLLM(_handler))

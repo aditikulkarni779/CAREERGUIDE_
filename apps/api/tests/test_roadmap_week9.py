@@ -11,7 +11,7 @@ from app.adapters.models import (
     UserSkill,
 )
 from app.services.gap_service import compute_gaps, resolve_role
-from app.services.roadmap_service import generate_roadmap, get_items
+from app.services.roadmap_service import generate_roadmap, get_items, get_or_generate_roadmap
 
 CREDS = {"email": "rm9@example.com", "password": "supersecret123"}
 
@@ -88,6 +88,23 @@ def test_generate_roadmap_milestones_and_versions(db_session: Session) -> None:
 
     rm2 = generate_roadmap(db_session, prof, role)
     assert rm2.version == 2
+
+
+def test_get_or_generate_dedupes_until_twin_changes(db_session: Session) -> None:
+    skills = _seed_role(db_session)
+    prof = _profile_with(db_session, skills, py_prof=50)
+    role = resolve_role(db_session, "ml-engineer")
+    assert role is not None
+
+    r1 = get_or_generate_roadmap(db_session, prof, role)
+    r2 = get_or_generate_roadmap(db_session, prof, role)  # same twin -> reuse
+    assert r1.id == r2.id
+    assert r2.version == 1
+
+    prof.twin_version += 1  # Twin changed
+    db_session.commit()
+    r3 = get_or_generate_roadmap(db_session, prof, role)
+    assert r3.version == 2
 
 
 # ---- Endpoints ----

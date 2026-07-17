@@ -19,11 +19,13 @@ from app.agents.planner import Planner
 from app.agents.verification import Verifier
 from app.rag.retriever import Retriever
 from app.rag.types import Chunk
-from app.services.conversation_service import add_message
+from app.services.conversation_service import add_message, list_messages
 from app.services.gap_service import resolve_role
 from app.services.memory_service import MemoryService
-from app.services.roadmap_service import generate_roadmap, get_items
+from app.services.roadmap_service import get_items, get_or_generate_roadmap
 from app.services.skill_service import normalize_slug
+
+_HISTORY_TURNS = 6
 
 _SYSTEM = (
     "You are an expert AI career mentor. Use the provided context and any user "
@@ -65,7 +67,7 @@ class ChatStreamer:
         role = resolve_role(db, role_slug)
         if profile is None or role is None:
             return [], ""
-        roadmap = generate_roadmap(db, profile, role)
+        roadmap = get_or_generate_roadmap(db, profile, role)
         items = get_items(db, roadmap.id)
         event = _sse(
             "roadmap",
@@ -125,8 +127,17 @@ class ChatStreamer:
             f"Question: {query}"
         )
 
+        # Prior turns for multi-turn follow-ups (exclude the just-persisted current msg).
+        history = list_messages(db, conversation_id)[:-1][-_HISTORY_TURNS:]
+        llm_messages: list[Message] = [
+            Message("assistant" if m.role.value == "assistant" else "user", m.content)
+            for m in history
+            if m.role.value in ("user", "assistant")
+        ]
+        llm_messages.append(Message("user", user_prompt))
+
         answer_parts: list[str] = []
-        for token in self._llm.stream(_SYSTEM, [Message("user", user_prompt)], tier="balanced"):
+        for token in self._llm.stream(_SYSTEM, llm_messages, tier="balanced"):
             answer_parts.append(token)
             yield _sse("token", {"t": token})
         answer = "".join(answer_parts).strip()
